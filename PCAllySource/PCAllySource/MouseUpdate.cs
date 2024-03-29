@@ -28,12 +28,12 @@ namespace PCAllySource
             //this.X = 0;
             //this.Y = 0;
         }
-        public int X
+        public float X
         {
             get;
             set;
         }
-        public int Y
+        public float Y
         {
             get;
             set;

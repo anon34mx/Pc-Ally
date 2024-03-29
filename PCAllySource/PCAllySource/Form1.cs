@@ -13,6 +13,7 @@ using System.Web.Services.Description;
 using static System.Net.Mime.MediaTypeNames;
 using Newtonsoft.Json;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace PCAllySource
 {
@@ -40,6 +41,7 @@ namespace PCAllySource
         Thread threadMouse;
         System.Timers.Timer timerPosAsiento;
         private int serialPortErrors = 0;
+        //Stopwatch deltaTime = new Stopwatch();
         public Form1()
         {
             InitializeComponent();
@@ -95,7 +97,9 @@ namespace PCAllySource
                     Port.Close();
             }
             catch (Exception ex)
-            { }
+            {
+                Console.WriteLine(ex);
+            }
             try
             {
                 Port = new System.IO.Ports.SerialPort
@@ -123,20 +127,21 @@ namespace PCAllySource
         {
             while (!serialPortClosed)
             {
+                //deltaTime.Start();
                 try
                 {
                     string text = Port.ReadLine();
+                    Console.WriteLine("->" + text + "<-");
                     MouseUpdate mouseData = JsonConvert.DeserializeObject<MouseUpdate>(text);
                     var coords = JsonConvert.DeserializeObject<Coords>(mouseData.Data.ToString());
-                    if (mouseData!=null)
+                    if (mouseData != null)
                     {
-                        //Console.WriteLine("->" + text + "<-");
                         //Console.WriteLine("->" + mouseData.Method + "<-");
                         //Console.WriteLine("->" + mouseData.Data + "<-");
                         Console.WriteLine("-> X = " + Cursor.Position.X + " __  Y = " + Cursor.Position.Y + "<-");
                         Console.WriteLine("-> X = " + coords.X + "<--> Y = " + coords.Y + "<-\n");
 
-                        Cursor.Position = new Point(Cursor.Position.X + coords.X, Cursor.Position.Y + coords.Y);
+                        Cursor.Position = new Point((int) (Cursor.Position.X + coords.X), (int) (Cursor.Position.Y + coords.Y));
                     }
                     //var x=new 
                 }
@@ -144,6 +149,8 @@ namespace PCAllySource
                 {
 
                 }
+                //deltaTime.Stop();
+                //Console.WriteLine(deltaTime.ElapsedMilliseconds);
             }
         }
 
