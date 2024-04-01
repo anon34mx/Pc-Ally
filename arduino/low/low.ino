@@ -42,6 +42,7 @@ bool Touch_getXY(void)
     pinMode(YP, OUTPUT);      //restore shared pins
     pinMode(XM, OUTPUT);      //because TFT control pins
     bool pressed = (p.z > MINPRESSURE && p.z < MAXPRESSURE);
+    Serial.println(pressed);
     if (pressed) {
       // pixel_x = map(p.x, TS_LEFT, TS_RT, 0, tft.width()); //.kbv makes sense to me
       // pixel_y = map(p.y, TS_TOP, TS_BOT, 0, tft.height());
@@ -71,7 +72,7 @@ void setup()
   tft.setRotation(1);
   
   on_btn.initButton(&tft, 16, 224, 30, 30, WHITE, CYAN, BLACK, "ON", 1);
-  on_btn.drawButton(true);
+  // on_btn.drawButton(true);
   tft.fillRect(30, 211, 370, 29, BLACK);
   startMenu=0;
 }
@@ -122,24 +123,22 @@ int mouse_action=0;
 // 1 left click
 // 2 right click
 // 3 middle click
-// 4 scroll up
+// 4 scroll upf
 // 5 scroll down
 
 void mouse(){
   double currentTime = millis();
   deltaTime=(currentTime - deltaTime);
+  
   bool down = Touch_getXY();
   left_click.press(down && left_click.contains(pixel_x, pixel_y));
-  if (left_click.justPressed()) {
-    Serial.println((String) "{method:'mousepad',data:{click:'L_pressed'}}");
-    // mouse_action="L_presz2sed";
-    // delay(1000);
-  }
   if (left_click.justReleased()) {
-    Serial.println((String) "{method:'mousepad',data:{click:'L_released'}}");
-    mouse_action="L_released";
-    // delay(1000);
+    // Serial.println((String) "{method:'mousepad',data:{click:'L_released'}}");
   }
+  if (left_click.justPressed()) {
+    // Serial.println((String) "{method:'mousepad',data:{click:'L_pressed'}}");
+  }
+
   
   if(last_mouse_x!=pixel_x || last_mouse_y!=pixel_y){
     // Serial.println((String) "{method:'mousepad',data:{x:"+(last_mouse_x - pixel_x)*-(deltaTime*speed)+",y:"+(last_mouse_y - pixel_y)*-(deltaTime*speed)+"}}");
