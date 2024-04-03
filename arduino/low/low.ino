@@ -36,23 +36,33 @@ const int TS_LEFT=880,TS_RT=132,TS_TOP=57,TS_BOT=930;
 TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 Adafruit_GFX_Button on_btn;
 int pixel_x, pixel_y;     //Touch_getXY() updates global vars
+unsigned long lastDebounce=0;
+unsigned long debounceDelay=50;
+bool lastTouchState=false;
 bool Touch_getXY(void)
 {
     TSPoint p = ts.getPoint();
     pinMode(YP, OUTPUT);      //restore shared pins
     pinMode(XM, OUTPUT);      //because TFT control pins
     bool pressed = (p.z > MINPRESSURE && p.z < MAXPRESSURE);
-    Serial.println(pressed);
-    if (pressed) {
-      // pixel_x = map(p.x, TS_LEFT, TS_RT, 0, tft.width()); //.kbv makes sense to me
-      // pixel_y = map(p.y, TS_TOP, TS_BOT, 0, tft.height());
-      pixel_y = map(p.x, TS_LEFT, TS_RT, tft.height(), 0); //.kbv makes sense to me
-      pixel_x = map(p.y, TS_TOP, TS_BOT, 0, tft.width());
-      // Serial.print(pixel_x);
-      // Serial.print(" - ");
-      // Serial.println(pixel_y);
+    // Serial.println(pressed);
+
+    if(pressed != lastTouchState){
+      lastDebounce=millis();
     }
-    return pressed;
+    // if((millis()-lastDebounce) > debounceDelay){
+      if (pressed) {
+        // pixel_x = map(p.x, TS_LEFT, TS_RT, 0, tft.width()); //.kbv makes sense to me
+        // pixel_y = map(p.y, TS_TOP, TS_BOT, 0, tft.height());
+        pixel_y = map(p.x, TS_LEFT, TS_RT, tft.height(), 0); //.kbv makes sense to me
+        pixel_x = map(p.y, TS_TOP, TS_BOT, 0, tft.width());
+        // Serial.print(pixel_x); Serial.print(" - "); Serial.println(pixel_y);
+      }
+      lastTouchState=pressed;
+      return pressed;
+    // }else{
+    //   return lastTouchState;
+    // }
 }
 
 //aaron
@@ -64,7 +74,7 @@ void setup()
   uint16_t ID;
   Serial.begin(9600);
   ID = tft.readID();
-  Serial.println(ID, HEX);
+  // Serial.println(ID, HEX);
   if (ID == 0x0D3D3) ID = 0x9481;
   tft.begin(ID);
   tft.fillScreen(BLUE);
@@ -132,16 +142,16 @@ void mouse(){
   
   bool down = Touch_getXY();
   left_click.press(down && left_click.contains(pixel_x, pixel_y));
-  if (left_click.justReleased()) {
-    // Serial.println((String) "{method:'mousepad',data:{click:'L_released'}}");
+  if (left_click.justReleased() && pixel_x>360) {
+    Serial.println((String) "{method:'mousepad',data:{click:'L_released'}}");
   }
-  if (left_click.justPressed()) {
-    // Serial.println((String) "{method:'mousepad',data:{click:'L_pressed'}}");
+  if (left_click.justPressed() && pixel_x>360) {
+    Serial.println((String) "{method:'mousepad',data:{click:'L_pressed'}}");
   }
 
   
-  if(last_mouse_x!=pixel_x || last_mouse_y!=pixel_y){
-    // Serial.println((String) "{method:'mousepad',data:{x:"+(last_mouse_x - pixel_x)*-(deltaTime*speed)+",y:"+(last_mouse_y - pixel_y)*-(deltaTime*speed)+"}}");
+  if((last_mouse_x!=pixel_x || last_mouse_y!=pixel_y) && pixel_x <= 360){
+    Serial.println((String) "{method:'mousepad',data:{x:"+(last_mouse_x - pixel_x)*-(deltaTime*speed)+",y:"+(last_mouse_y - pixel_y)*-(deltaTime*speed)+"}}");
   }
   last_mouse_x=pixel_x;
   last_mouse_y=pixel_y;

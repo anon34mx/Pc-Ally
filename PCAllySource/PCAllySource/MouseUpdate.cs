@@ -39,4 +39,12 @@ namespace PCAllySource
             set;
         }
     }
+    internal class MouseEvents
+    {
+        public MouseEvents() { }
+        public string eventString{
+            get;
+            set;
+        }
+    }
 }

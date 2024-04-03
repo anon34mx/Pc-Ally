@@ -14,6 +14,7 @@ using static System.Net.Mime.MediaTypeNames;
 using Newtonsoft.Json;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using static System.Windows.Forms.LinkLabel;
 
 namespace PCAllySource
 {
@@ -106,9 +107,10 @@ namespace PCAllySource
                 {
                     PortName = portName,
                     BaudRate = 9600,
-                    ReadTimeout = 500
+                    //ReadTimeout = 500
                 };
                 Port.Open();
+                //Port.ReadTimeout = 500;
                 Console.WriteLine("Port " + portName + " opened");
                 threadSerial = new Thread(ListenSerial);
                 threadSerial.Start();
@@ -128,26 +130,29 @@ namespace PCAllySource
             while (!serialPortClosed)
             {
                 //deltaTime.Start();
+                string text = "";
                 try
                 {
-                    string text = Port.ReadLine();
-                    Console.WriteLine("->" + text + "<-");
-                    MouseUpdate mouseData = JsonConvert.DeserializeObject<MouseUpdate>(text);
-                    var coords = JsonConvert.DeserializeObject<Coords>(mouseData.Data.ToString());
-                    if (mouseData != null)
-                    {
-                        //Console.WriteLine("->" + mouseData.Method + "<-");
-                        //Console.WriteLine("->" + mouseData.Data + "<-");
-                        Console.WriteLine("-> X = " + Cursor.Position.X + " __  Y = " + Cursor.Position.Y + "<-");
-                        Console.WriteLine("-> X = " + coords.X + "<--> Y = " + coords.Y + "<-\n");
-
-                        Cursor.Position = new Point((int) (Cursor.Position.X + coords.X), (int) (Cursor.Position.Y + coords.Y));
-                    }
-                    //var x=new 
+                    text = Port.ReadLine();
                 }
-                catch (Exception e)
+                catch (Exception e) { Console.WriteLine(e); }
+                if (text!="")
                 {
-
+                    try{
+                        Console.WriteLine("->" + text + "<-");
+                        MouseUpdate mouseData = JsonConvert.DeserializeObject<MouseUpdate>(text);
+                        var coords = JsonConvert.DeserializeObject<Coords>(mouseData.Data.ToString());
+                        var events = JsonConvert.DeserializeObject<MouseEvents>(mouseData.Data.ToString());
+                        if (mouseData != null)
+                        {
+                            //Console.WriteLine("->" + mouseData.Method + "<-");
+                            //Console.WriteLine("->" + mouseData.Data + "<-");
+                            //Console.WriteLine("-> X = " + Cursor.Position.X + " __  Y = " + Cursor.Position.Y + "<-");
+                            //Console.WriteLine("-> X = " + coords.X + "<--> Y = " + coords.Y + "<-\n");
+                            Console.WriteLine(events.eventString);
+                            Cursor.Position = new Point((int)(Cursor.Position.X + coords.X), (int)(Cursor.Position.Y + coords.Y));
+                        }
+                    }catch (Exception e) { }
                 }
                 //deltaTime.Stop();
                 //Console.WriteLine(deltaTime.ElapsedMilliseconds);
