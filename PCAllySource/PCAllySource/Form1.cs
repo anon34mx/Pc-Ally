@@ -16,6 +16,7 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using static System.Windows.Forms.LinkLabel;
 
+
 namespace PCAllySource
 {
     public partial class Form1 : Form
@@ -150,7 +151,7 @@ namespace PCAllySource
                             //Console.WriteLine("-> X = " + Cursor.Position.X + " __  Y = " + Cursor.Position.Y + "<-");
                             //Console.WriteLine("-> X = " + coords.X + "<--> Y = " + coords.Y + "<-\n");
                             Console.WriteLine(events.eventString);
-                            Cursor.Position = new Point((int)(Cursor.Position.X + coords.X), (int)(Cursor.Position.Y + coords.Y));
+                            //Cursor.Position = new Point((int)(Cursor.Position.X + coords.X), (int)(Cursor.Position.Y + coords.Y));
                         }
                     }catch (Exception e) { }
                 }
@@ -179,7 +180,38 @@ namespace PCAllySource
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
         public static extern void mouse_event(long dwFlags, long dx, long dy, long cButtons, long dwExtraInfo);
+        [DllImport("user32.dll")]
+        static extern bool GetCursorPos(ref Point lpPoint);
 
+        private void button4_Click(object sender, EventArgs e)
+        {
+            moveCursor(16,16,4);
+        }
+
+        private void moveCursor(int X, int Y, int steps)
+        {
+            Point start = new Point();
+            GetCursorPos(ref start);
+
+            Point iterPoint = new Point();
+
+            Point slope = new Point(X - start.X, Y - start.Y);
+            slope.X = slope.X/steps;
+            slope.Y = slope.Y / steps;
+
+            for (int i=0; i<steps;i++)
+            {
+                iterPoint = new Point(iterPoint.X + slope.X, iterPoint.Y + slope.Y);
+                Console.WriteLine(iterPoint.X);
+            }
+
+            // Call the function and pass the Point, defPnt
+            
+            //Console.WriteLine("X = " + defPnt.X.ToString());
+            //Console.WriteLine("Y = " + defPnt.Y.ToString());
+            //Thread.Sleep(1000);
+
+        }
     }
 
 }

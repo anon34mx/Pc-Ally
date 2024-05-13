@@ -60,9 +60,7 @@ bool Touch_getXY(void)
       }
       lastTouchState=pressed;
       return pressed;
-    // }else{
-    //   return lastTouchState;
-    // }
+    // }el2
 }
 
 //aaron
@@ -74,7 +72,7 @@ void setup()
   uint16_t ID;
   Serial.begin(9600);
   ID = tft.readID();
-  // Serial.println(ID, HEX);
+  Serial.println(ID, HEX);
   if (ID == 0x0D3D3) ID = 0x9481;
   tft.begin(ID);
   tft.fillScreen(BLUE);
