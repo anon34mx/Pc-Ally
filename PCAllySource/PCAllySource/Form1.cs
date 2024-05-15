@@ -152,6 +152,7 @@ namespace PCAllySource
                             //Console.WriteLine("-> X = " + coords.X + "<--> Y = " + coords.Y + "<-\n");
                             Console.WriteLine(events.eventString);
                             //Cursor.Position = new Point((int)(Cursor.Position.X + coords.X), (int)(Cursor.Position.Y + coords.Y));
+                            moveCursor((int)coords.X, (int)coords.Y, 4);
                         }
                     }catch (Exception e) { }
                 }
@@ -185,28 +186,49 @@ namespace PCAllySource
 
         private void button4_Click(object sender, EventArgs e)
         {
-            moveCursor(16,16,4);
+            moveCursor(15,15,4);
         }
 
         private void moveCursor(int X, int Y, int steps)
         {
-            Point start = new Point();
-            GetCursorPos(ref start);
+            //Cursor.Position = new Point((int)(100), (int)(100));
+            //Point start = new Point(Cursor.Position.X, Cursor.Position.Y);
+            //Point end = new Point(200, 200);
+            //Point step = new Point(Cursor.Position.X/steps, Cursor.Position.Y/steps);
+            Point start = new Point((int)Cursor.Position.X, (int)Cursor.Position.Y);
+            //start.X = ;
+            Point end = new Point((int)Cursor.Position.X + X, (int)Cursor.Position.Y + Y);
+            Point step = new Point((int)X / steps, (int)Y / steps);
 
-            Point iterPoint = new Point();
-
-            Point slope = new Point(X - start.X, Y - start.Y);
-            slope.X = slope.X/steps;
-            slope.Y = slope.Y / steps;
-
-            for (int i=0; i<steps;i++)
+            for (int i = 0; i < steps; i++)
             {
-                iterPoint = new Point(iterPoint.X + slope.X, iterPoint.Y + slope.Y);
-                Console.WriteLine(iterPoint.X);
+                Console.WriteLine(X + " - " + Cursor.Position.X);
+                Console.WriteLine(start.X +" - "+end.X +" - "+step.X);
+                //Console.WriteLine(start.X+" - "+end.X+" - "+step.X);
+                Cursor.Position = new Point((int)(start.X), (int)(start.Y));
+                start.X = start.X+step.X;
+                start.Y = start.Y + step.Y;
+                Thread.Sleep(8);
             }
 
+
+
+            //GetCursorPos(ref start);
+
+            //Point iterPoint = new Point();
+
+            //Point slope = new Point(X - start.X, Y - start.Y);
+            //slope.X = slope.X/steps;
+            //slope.Y = slope.Y / steps;
+
+            //for (int i=0; i<steps;i++)
+            //{
+            //    iterPoint = new Point(iterPoint.X + slope.X, iterPoint.Y + slope.Y);
+            //    Console.WriteLine(iterPoint.X);
+            //}
+
             // Call the function and pass the Point, defPnt
-            
+
             //Console.WriteLine("X = " + defPnt.X.ToString());
             //Console.WriteLine("Y = " + defPnt.Y.ToString());
             //Thread.Sleep(1000);
