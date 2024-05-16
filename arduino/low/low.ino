@@ -36,31 +36,23 @@ const int TS_LEFT=880,TS_RT=132,TS_TOP=57,TS_BOT=930;
 TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 Adafruit_GFX_Button on_btn;
 int pixel_x, pixel_y;     //Touch_getXY() updates global vars
-unsigned long lastDebounce=0;
-unsigned long debounceDelay=50;
-bool lastTouchState=false;
+
 bool Touch_getXY(void)
 {
-    TSPoint p = ts.getPoint();
-    pinMode(YP, OUTPUT);      //restore shared pins
-    pinMode(XM, OUTPUT);      //because TFT control pins
-    bool pressed = (p.z > MINPRESSURE && p.z < MAXPRESSURE);
-    // Serial.println(pressed);
-
-    if(pressed != lastTouchState){
-      lastDebounce=millis();
-    }
-    // if((millis()-lastDebounce) > debounceDelay){
-      if (pressed) {
-        // pixel_x = map(p.x, TS_LEFT, TS_RT, 0, tft.width()); //.kbv makes sense to me
-        // pixel_y = map(p.y, TS_TOP, TS_BOT, 0, tft.height());
-        pixel_y = map(p.x, TS_LEFT, TS_RT, tft.height(), 0); //.kbv makes sense to me
-        pixel_x = map(p.y, TS_TOP, TS_BOT, 0, tft.width());
-        // Serial.print(pixel_x); Serial.print(" - "); Serial.println(pixel_y);
-      }
-      lastTouchState=pressed;
-      return pressed;
-    // }el2
+  TSPoint p = ts.getPoint();
+  pinMode(YP, OUTPUT);      //restore shared pins
+  pinMode(XM, OUTPUT);      //because TFT control pins
+  bool pressed = (p.z > MINPRESSURE && p.z < MAXPRESSURE);
+  if (pressed) {
+    // pixel_x = map(p.x, TS_LEFT, TS_RT, 0, tft.width()); //.kbv makes sense to me
+    // pixel_y = map(p.y, TS_TOP, TS_BOT, 0, tft.height());
+    pixel_y = map(p.x, TS_LEFT, TS_RT, tft.height(), 0);
+    pixel_x = map(p.y, TS_TOP, TS_BOT, 0, tft.width());
+    // Serial.print(pixel_x);
+    // Serial.print(" - ");
+    // Serial.println(pixel_y);
+  }
+  return pressed;
 }
 
 //aaron
@@ -80,7 +72,7 @@ void setup()
   tft.setRotation(1);
   
   on_btn.initButton(&tft, 16, 224, 30, 30, WHITE, CYAN, BLACK, "ON", 1);
-  // on_btn.drawButton(true);
+  on_btn.drawButton(true);
   tft.fillRect(30, 211, 370, 29, BLACK);
   startMenu=0;
 }
@@ -112,6 +104,8 @@ void loop(){
 }
 
 Adafruit_GFX_Button left_click;
+Adafruit_GFX_Button right_click;
+Adafruit_GFX_Button middle_click;
 void initMouse(){
   delay(10);
   tft.fillRect(0, 0, 360, 240, RED);
@@ -119,8 +113,14 @@ void initMouse(){
   tft.fillRect(360, 90, 40, 60, YELLOW);
   tft.fillRect(360, 150, 40, 90, BLUE);
 
-  left_click.initButton(&tft, 380, 45, 40, 90, WHITE, CYAN, BLACK, "CLICK", 1);
-  left_click.drawButton(true);
+  left_click.initButton(&tft, 380, 45, 40, 90, WHITE, CYAN, BLACK, "[L]", 1);
+  left_click.drawButton(true);  
+
+  middle_click.initButton(&tft, 380, 120, 40, 60, WHITE, CYAN, BLACK, "[M]", 1);
+  middle_click.drawButton(true);
+
+  right_click.initButton(&tft, 380, 194, 40, 90, WHITE, CYAN, BLACK, "[R]", 1);
+  right_click.drawButton(true);
 }
 int last_mouse_x=0;
 int last_mouse_y=0;
@@ -131,24 +131,71 @@ int mouse_action=0;
 // 1 left click
 // 2 right click
 // 3 middle click
-// 4 scroll upf
+// 4 scroll up
 // 5 scroll down
 
+// boolean state = false;
+boolean lastState=false;
+long lastDebounce=0;
+int debounceDelay=100;
+bool isPressed=false;
+bool lClickState=false;
+bool mClickState=false;
+bool rClickState=false;
 void mouse(){
   double currentTime = millis();
   deltaTime=(currentTime - deltaTime);
-  
   bool down = Touch_getXY();
-  left_click.press(down && left_click.contains(pixel_x, pixel_y));
-  if (left_click.justReleased() && pixel_x>360) {
-    Serial.println((String) "{method:'mousepad',data:{click:'L_released'}}");
-  }
-  if (left_click.justPressed() && pixel_x>360) {
-    Serial.println((String) "{method:'mousepad',data:{click:'L_pressed'}}");
-  }
 
-  
-  if((last_mouse_x!=pixel_x || last_mouse_y!=pixel_y) && pixel_x <= 360){
+  if(down != lastState){
+    lastDebounce=currentTime;
+  }
+  middle_click.press(down && middle_click.contains(pixel_x, pixel_y));
+  if (middle_click.justPressed()){
+    mClickState=true;
+  }
+  if (middle_click.justReleased()){
+    mClickState=false;
+  }
+  left_click.press(down && left_click.contains(pixel_x, pixel_y));
+  if (left_click.justPressed()){
+    lClickState=true;
+  }
+  if (left_click.justReleased()){
+    lClickState=false;
+  }
+  right_click.press(down && right_click.contains(pixel_x, pixel_y));
+  if (right_click.justPressed()){
+    rClickState=true;
+    // Serial.println("R_down");
+  }
+  if (right_click.justReleased()){
+    rClickState=false;
+    // Serial.println("R_up");
+  }
+  if(currentTime - lastDebounce > debounceDelay){
+    if(isPressed!=down){
+      isPressed=down;
+      if(isPressed){
+        if(lClickState==true){
+          Serial.println((String) "{method:'mousepad',data:{click:'L_pressed'}}");
+        }
+        if(rClickState==true){
+          Serial.println((String) "{method:'mousepad',data:{click:'R_pressed'}}");
+        }
+        if(mClickState==true){
+          Serial.println((String) "{method:'mousepad',data:{click:'M_pressed'}}");
+        }
+      }else{
+        Serial.println((String) "{method:'mousepad',data:{click:'released'}}");
+      }
+    }
+  }else{}// no presionado
+  lastState = down;
+  if(mClickState){
+    Serial.println((String) "{method:'mousepad',data:{scroll:y:"+(last_mouse_y - pixel_y)*-(deltaTime*speed)+"}}");
+  }
+  if(pixel_x<360 && (last_mouse_x!=pixel_x || last_mouse_y!=pixel_y)){
     Serial.println((String) "{method:'mousepad',data:{x:"+(last_mouse_x - pixel_x)*-(deltaTime*speed)+",y:"+(last_mouse_y - pixel_y)*-(deltaTime*speed)+"}}");
   }
   last_mouse_x=pixel_x;
