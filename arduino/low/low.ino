@@ -188,9 +188,15 @@ void mouse(){
         }
       }else{
         Serial.println((String) "{method:'mousepad',data:{click:'released'}}");
+        lastState=false;
+        isPressed=false;
       }
+    }else{
+      //puede ser aqui
     }
-  }else{}// no presionado
+  }else{
+    // Serial.println("NO");
+  }// no presionado
   lastState = down;
   if(mClickState){
     Serial.println((String) "{method:'mousepad',data:{scroll:y:"+(last_mouse_y - pixel_y)*-(deltaTime*speed)+"}}");

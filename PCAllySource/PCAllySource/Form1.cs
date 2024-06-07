@@ -208,7 +208,7 @@ namespace PCAllySource
                 Cursor.Position = new Point((int)(start.X), (int)(start.Y));
                 start.X = start.X+step.X;
                 start.Y = start.Y + step.Y;
-                Thread.Sleep(8);
+                //Thread.Sleep(8);
             }
 
 
