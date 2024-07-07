@@ -48,16 +48,12 @@ bool Touch_getXY(void)
     // pixel_y = map(p.y, TS_TOP, TS_BOT, 0, tft.height());
     pixel_y = map(p.x, TS_LEFT, TS_RT, tft.height(), 0);
     pixel_x = map(p.y, TS_TOP, TS_BOT, 0, tft.width());
-    // Serial.print(pixel_x);
-    // Serial.print(" - ");
-    // Serial.println(pixel_y);
   }
   return pressed;
 }
 
 //aaron
 bool startMenu;
-
 
 void setup()
 {
@@ -81,9 +77,7 @@ void loop(){
   on_btn.press(down && on_btn.contains(pixel_x, pixel_y));
   if (on_btn.justPressed()) {
     startMenu=!startMenu;
-    Serial.println(startMenu);
       if(startMenu==false){
-        // on_btn.drawButton(true);
         tft.fillRect(0, 0, 80, 210, BLUE);
       }else{
         tft.fillRect(0, 0, 80, 210, BLACK);
@@ -107,7 +101,7 @@ Adafruit_GFX_Button left_click;
 Adafruit_GFX_Button right_click;
 Adafruit_GFX_Button middle_click;
 void initMouse(){
-  delay(10);
+  delay(15);
   tft.fillRect(0, 0, 360, 240, RED);
   tft.fillRect(360, 0, 40, 90, GREEN);
   tft.fillRect(360, 90, 40, 60, YELLOW);
@@ -167,27 +161,25 @@ void mouse(){
   right_click.press(down && right_click.contains(pixel_x, pixel_y));
   if (right_click.justPressed()){
     rClickState=true;
-    // Serial.println("R_down");
   }
   if (right_click.justReleased()){
     rClickState=false;
-    // Serial.println("R_up");
   }
   if(currentTime - lastDebounce > debounceDelay){
     if(isPressed!=down){
       isPressed=down;
       if(isPressed){
         if(lClickState==true){
-          Serial.println((String) "{method:'mousepad',data:{click:'L_pressed'}}");
+          Serial.println((String) "{\"method\":\"mousepad\",\"data\":{\"click\":\"L_pressed\"}}");
         }
         if(rClickState==true){
-          Serial.println((String) "{method:'mousepad',data:{click:'R_pressed'}}");
+          Serial.println((String) "{\"method\":\"mousepad\",\"data\":{\"click\":\"R_pressed\"}}");
         }
         if(mClickState==true){
-          Serial.println((String) "{method:'mousepad',data:{click:'M_pressed'}}");
+          Serial.println((String) "{\"method\":\"mousepad\",\"data\":{\"click\":\"M_pressed\"}}");
         }
       }else{
-        Serial.println((String) "{method:'mousepad',data:{click:'released'}}");
+        Serial.println((String) "{\"method\":\"mousepad\",\"data\":{\"click\":\"released\"}}");
         lastState=false;
         isPressed=false;
       }
@@ -199,10 +191,10 @@ void mouse(){
   }// no presionado
   lastState = down;
   if(mClickState){
-    Serial.println((String) "{method:'mousepad',data:{scroll:y:"+(last_mouse_y - pixel_y)*-(deltaTime*speed)+"}}");
+    Serial.println((String) "{\"method\":\"mousepad\",\"data\":{\"scroll_y\":"+(last_mouse_y - pixel_y)*-(deltaTime*speed)+"}}");
   }
   if(pixel_x<360 && (last_mouse_x!=pixel_x || last_mouse_y!=pixel_y)){
-    Serial.println((String) "{method:'mousepad',data:{x:"+(last_mouse_x - pixel_x)*-(deltaTime*speed)+",y:"+(last_mouse_y - pixel_y)*-(deltaTime*speed)+"}}");
+    Serial.println((String) "{\"method\":\"mousepad\",\"data\":{\"x\":" +(last_mouse_x - pixel_x)*-(deltaTime*speed)+ ",\"y\":" +(last_mouse_y - pixel_y)*-(deltaTime*speed)+ "}}");
   }
   last_mouse_x=pixel_x;
   last_mouse_y=pixel_y;
