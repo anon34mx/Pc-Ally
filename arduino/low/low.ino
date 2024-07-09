@@ -165,6 +165,7 @@ void mouse(){
           obj["data"]="L_pressed";
           Serial.println("");
           serializeJson(doc, Serial);
+          obj.clear();
         }
         if(rClickState==true){
           // Serial.println((String) "{\"method\":\"mousepad\",\"data\":{\"click\":\"R_pressed\"}}");
@@ -172,6 +173,7 @@ void mouse(){
           obj["data"]="R_pressed";
           Serial.println("");
           serializeJson(doc, Serial);
+          obj.clear();
         }
         if(mClickState==true){
           // Serial.println((String) "{\"method\":\"mousepad\",\"data\":{\"click\":\"M_pressed\"}}");
@@ -179,6 +181,7 @@ void mouse(){
           obj["data"]="M_pressed";
           Serial.println("");
           serializeJson(doc, Serial);
+          obj.clear();
         }
       }else{
         // Serial.println((String) "{\"method\":\"mousepad\",\"data\":{\"click\":\"released\"}}");
@@ -186,9 +189,10 @@ void mouse(){
         obj["data"]="released";
         Serial.println("");
         serializeJson(doc, Serial);
+        obj.clear();
         lastState=false;
         isPressed=false;
-        drawMousepad();
+        // drawMousepad();
       }
     }else{
       //puede ser aqui
@@ -204,11 +208,12 @@ void mouse(){
   if(pixel_x<360 && (last_mouse_x!=pixel_x || last_mouse_y!=pixel_y)){
     // Serial.println((String) "{\"method\":\"mousepad\",\"data\":{\"x\":" +(last_mouse_x - pixel_x)*-(deltaTime*speed)+ ",\"y\":" +(last_mouse_y - pixel_y)*-(deltaTime*speed)+ "}}");
     obj["method"]="mouse_move";
+    obj["data"]["X"]=(last_mouse_x - pixel_x)*-(deltaTime*speed);
+    obj["data"]["y"]=(last_mouse_y - pixel_y)*-(deltaTime*speed);
     // obj["data"]["X"]=(last_mouse_x - pixel_x)*-(deltaTime*speed);
-    // obj["data"]["y"]=(last_mouse_y - pixel_y)*-(deltaTime*speed);
-    obj["data"]=(last_mouse_x - pixel_x)*-(deltaTime*speed);
     Serial.println("");
     serializeJson(doc, Serial);
+    obj.clear();
   }
   last_mouse_x=pixel_x;
   last_mouse_y=pixel_y;
