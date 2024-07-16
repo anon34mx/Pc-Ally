@@ -9,7 +9,7 @@
 #define MAGENTA 0xF81F
 #define YELLOW  0xFFE0
 #define WHITE   0xFFFF
-#define ORANGE   0xFF7F27FF
+#define ORANGE   0xFF6F00
 
 #include <SPI.h>            // f.k. for Arduino-1.5.2
 #include <Adafruit_GFX.h>   // Hardware-specific library
@@ -70,10 +70,12 @@ void loop() {
       digitalpad(btn_0);
     }
   }else if(modo=="music"){
-      tft.fillScreen(BLUE);
+      tft.fillScreen(BLACK);
+      tft.setTextColor(RED, BLACK);
+      tft.setTextSize(2);
       int serialRecibido=0;
       while(modo=="music"){
-        musicInfo(serialRecibido);
+        musicInfo();
       }
   }
 }
@@ -89,14 +91,34 @@ void digitalpad(Adafruit_GFX_Button btn_0){
     Serial.println("btn_0_UP");
   }
 }
-void musicInfo(int serialRecibido){
-  tft.drawRect(0, 0, 240, 400, ORANGE);
+void musicInfo(){
+  String serialRecibido="";
   if (Serial.available() > 0) {
     // read the incoming byte:
-    serialRecibido = Serial.read();
+    serialRecibido = String(Serial.readStringUntil("\n"));
 
     // say what you got:
-    Serial.print("I received: ");
-    Serial.println(serialRecibido, DEC);
+    // Serial.print("I received: ");
+    // Serial.println(serialRecibido);
+    // tft.setCursor(50,50);
+    // tft.print(serialRecibido);
+    
+    JsonDocument doc;
+    deserializeJson(doc, serialRecibido);
+
+    tft.setCursor(00,50);
+    tft.print(doc["mode"].as<String>());
+    tft.setCursor(00,80);
+    tft.print(doc["title"].as<String>());
+    tft.setCursor(00,100);
+    tft.print(doc["time"].as<String>());
+    // tft.setCursor(100,100);
+    // tft.print(doc["title"].as<String>());
+    // tft.setCursor(110,110);
+    // tft.print(doc["time"].as<String>());
+
+    delay(1000);
   }
+  tft.setCursor(0,0);
+  tft.print("AIMP");
 }
