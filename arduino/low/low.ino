@@ -54,7 +54,75 @@ bool Touch_getXY(void)
 }
 
 //aaron
+<<<<<<< HEAD
+bool startMenu;
 
+
+void setup()
+{
+  uint16_t ID;
+  Serial.begin(9600);
+  ID = tft.readID();
+  Serial.println(ID, HEX);
+  if (ID == 0x0D3D3) ID = 0x9481;
+  tft.begin(ID);
+  // tft.fillScreen(BLUE);
+  tft.setTextColor(0xFFFF, 0x0000);
+  tft.setRotation(1);
+  
+  // on_btn.initButton(&tft, 16, 224, 30, 30, WHITE, CYAN, BLACK, "ON", 1);
+  // on_btn.drawButton(true);
+  // tft.fillRect(30, 211, 370, 29, BLACK);
+  startMenu=0;
+}
+void loop(){
+  // bool down = Touch_getXY();
+  // on_btn.press(down && on_btn.contains(pixel_x, pixel_y));
+  // if (on_btn.justPressed()) {
+  //   startMenu=!startMenu;
+  //   Serial.println(startMenu);
+  //     if(startMenu==false){
+  //       // on_btn.drawButton(true);
+  //       tft.fillRect(0, 0, 80, 210, BLUE);
+  //     }else{
+  //       tft.fillRect(0, 0, 80, 210, BLACK);
+  //     }
+  // }
+  // String incomingByte=Serial.readString();
+    // tft.setCursor(0, 0);
+    // tft.println(incomingByte);
+    // if(incomingByte=="hola"){
+    //   Serial.println("responder saludo");
+    // }else{
+    //   Serial.println(incomingByte);
+    // }
+    initMouse();
+    while (true) {
+      mouse();
+    }
+}
+
+=======
+>>>>>>> 6c5b023b3d9d7c6f5618200a237e1bccb62de5f1
+Adafruit_GFX_Button left_click;
+Adafruit_GFX_Button right_click;
+Adafruit_GFX_Button middle_click;
+
+int last_mouse_x=0;
+int last_mouse_y=0;
+float deltaTime=0;
+float speed=0.05;
+int mouse_action=0;
+// 0 none
+// 1 left click
+// 2 right click
+// 3 middle click
+// 4 scroll up
+// 5 scroll down
+// StaticJsonBuffer<200> jsonBuffer;
+// JsonDocument commands = jsonBuffer.createObject();
+JsonDocument doc;
+JsonObject obj = doc.to<JsonObject>();
 
 void setup()
 {
@@ -67,8 +135,26 @@ void setup()
   tft.setTextColor(0xFFFF, 0x0000);
   tft.setRotation(1);
   
+  delay(15);
+  // init mouse
+  
+
+  left_click.initButton(&tft, 380, 45, 40, 90, WHITE, CYAN, BLACK, "[L]", 1);
+  middle_click.initButton(&tft, 380, 120, 40, 60, WHITE, CYAN, BLACK, "[M]", 1);
+  right_click.initButton(&tft, 380, 194, 40, 90, WHITE, CYAN, BLACK, "[R]", 1);
+  drawMousepad();
+}
+void drawMousepad(){
+  tft.fillRect(0, 0, 360, 240, RED);
+  tft.fillRect(360, 0, 40, 90, GREEN);
+  tft.fillRect(360, 90, 40, 60, YELLOW);
+  tft.fillRect(360, 150, 40, 90, BLUE);
+  left_click.drawButton(true);
+  middle_click.drawButton(true);
+  right_click.drawButton(true);
 }
 void loop(){
+  bool down = Touch_getXY();
   // String incomingByte=Serial.readString();
     // tft.setCursor(0, 0);
     // tft.println(incomingByte);
@@ -81,7 +167,6 @@ void loop(){
       mouse();
     }
 }
-
 
 // boolean state = false;
 boolean lastState=false;
@@ -125,6 +210,7 @@ void mouse(){
       isPressed=down;
       if(isPressed){
         if(lClickState==true){
+          // Serial.println((String) "{\"method\":\"mousepad\",\"data\":{\"click\":\"L_pressed\"}}");
           obj["method"]="mouse_click";
           obj["data"]="L_pressed";
           Serial.println("");
@@ -132,10 +218,25 @@ void mouse(){
           obj.clear();
         }
         if(rClickState==true){
+          obj["method"]="mouse_click";
+          obj["data"]="R_pressed";
+          Serial.println("");
+          serializeJson(doc, Serial);
+          obj.clear();
         }
         if(mClickState==true){
+          obj["method"]="mouse_click";
+          obj["data"]="M_pressed";
+          Serial.println("");
+          serializeJson(doc, Serial);
+          obj.clear();
         }
       }else{
+        obj["method"]="mouse_click";
+        obj["data"]="released";
+        Serial.println("");
+        serializeJson(doc, Serial);
+        obj.clear();
         lastState=false;
         isPressed=false;
         // drawMousepad();
@@ -152,6 +253,13 @@ void mouse(){
     
   }
   if(pixel_x<360 && (last_mouse_x!=pixel_x || last_mouse_y!=pixel_y)){
+    obj["method"]="mouse_move";
+    obj["data"]["X"]=(last_mouse_x - pixel_x)*-(deltaTime*speed);
+    obj["data"]["y"]=(last_mouse_y - pixel_y)*-(deltaTime*speed);
+    // obj["data"]["X"]=(last_mouse_x - pixel_x)*-(deltaTime*speed);
+    Serial.println("");
+    serializeJson(doc, Serial);
+    obj.clear();
   }
   last_mouse_x=pixel_x;
   last_mouse_y=pixel_y;
