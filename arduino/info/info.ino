@@ -9,6 +9,7 @@
 #define MAGENTA 0xF81F
 #define YELLOW  0xFFE0
 #define WHITE   0xFFFF
+#define ORANGE   0xFF7F27FF
 
 #include <SPI.h>            // f.k. for Arduino-1.5.2
 #include <Adafruit_GFX.h>   // Hardware-specific library
@@ -42,6 +43,7 @@ bool Touch_getXY(void)
   return pressed;
 }
 
+String modo="music";
 
 void setup() {
   uint16_t ID;
@@ -57,16 +59,22 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if("numpad"=="numpad"){
+  if(modo=="numpad"){
     Adafruit_GFX_Button btn_0, btn_1, btn_2, btn_3, btn_4, btn_5, btn_6, btn_7, btn_8, btn_9;
     Adafruit_GFX_Button btn_bloqNum, btn_slash, btn_asterisk, btn_minus, btn_plus, btn_dot, btn_enter;
     // initButton(TFT, x, y, w, h, outline, fill, text_color, label, text_size);
     btn_0.initButton(&tft, 200, 200, 80, 30, WHITE, CYAN, BLACK, "0", 1);
     btn_0.drawButton(true);
     
-    while(true){
+    while(modo=="numpad"){
       digitalpad(btn_0);
     }
+  }else if(modo=="music"){
+      tft.fillScreen(BLUE);
+      int serialRecibido=0;
+      while(modo=="music"){
+        musicInfo(serialRecibido);
+      }
   }
 }
 
@@ -79,5 +87,16 @@ void digitalpad(Adafruit_GFX_Button btn_0){
   }
   if(btn_0.justReleased()){
     Serial.println("btn_0_UP");
+  }
+}
+void musicInfo(int serialRecibido){
+  tft.drawRect(0, 0, 240, 400, ORANGE);
+  if (Serial.available() > 0) {
+    // read the incoming byte:
+    serialRecibido = Serial.read();
+
+    // say what you got:
+    Serial.print("I received: ");
+    Serial.println(serialRecibido, DEC);
   }
 }
